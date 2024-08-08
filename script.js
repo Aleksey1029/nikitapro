@@ -1,249 +1,187 @@
-document.addEventListener('DOMContentLoaded', () => {
-	const products = [
-		{ id: 1, name: 'Product A', price: 12000 },
-		{ id: 2, name: 'Product B', price: 15000 },
-		{ id: 3, name: 'Product C', price: 20000 },
-		{ id: 4, name: 'Product D', price: 25000 },
-		{ id: 5, name: 'Product E', price: 30000 },
-		{ id: 6, name: 'Product F', price: 35000 },
-		{ id: 7, name: 'Product G', price: 40000 },
-		{ id: 8, name: 'Product H', price: 45000 },
-		{ id: 9, name: 'Product I', price: 50000 },
-		{ id: 10, name: 'Product J', price: 55000 },
-		{ id: 11, name: 'Product K', price: 60000 },
-		{ id: 12, name: 'Product L', price: 65000 },
-		{ id: 13, name: 'Product M', price: 70000 },
-		{ id: 14, name: 'Product N', price: 75000 },
-		{ id: 15, name: 'Product O', price: 80000 },
-	]
+let currentWarehouse = 1 // Текущий склад
+let warehouses = {
+	1: { products: [], history: [] },
+	2: { products: [], history: [] },
+	3: { products: [], history: [] },
+}
 
-	const productList = document.getElementById('product-list')
-	const searchBar = document.getElementById('search-bar')
-	const findButton = document.getElementById('find-button')
-	const productDropdown = document.getElementById('product-dropdown')
-	const warehouseTableBody = document.querySelector('#warehouse-table tbody')
-	const historyTableBody = document.querySelector('#history-table tbody')
+const warehouseTableBody = document
+	.getElementById('warehouse-table')
+	.getElementsByTagName('tbody')[0]
+const historyTableBody = document
+	.getElementById('history-table')
+	.getElementsByTagName('tbody')[0]
 
-	// Функция для отображения продуктов на основе поиска
-	function displayProducts(searchQuery) {
-		let found = false
+const findButton = document.getElementById('find-button')
+const searchBar = document.getElementById('search-bar')
 
-		Array.from(warehouseTableBody.rows).forEach(row => {
-			const productName = row.cells[0].textContent.toLowerCase()
-			if (productName.includes(searchQuery.toLowerCase())) {
-				found = true
-				row.classList.add('highlight')
-				row.scrollIntoView({ behavior: 'smooth', block: 'center' })
-
-				// Убираем подсветку через 5 секунд
-				setTimeout(() => {
-					row.classList.remove('highlight')
-				}, 5000)
-			} else {
-				row.classList.remove('highlight')
-			}
-		})
-
-		if (!found) {
-			alert('К сожалению товар не найден, введите точное название товара')
-		}
+// Загрузка данных из localStorage
+function loadFromLocalStorage() {
+	const savedData = localStorage.getItem('warehousesData')
+	if (savedData) {
+		warehouses = JSON.parse(savedData)
 	}
+}
 
-	// Функция для поиска и подсветки товара
-	function searchProduct() {
-		const searchQuery = searchBar.value.trim()
+// Сохранение данных в localStorage
+function saveToLocalStorage() {
+	localStorage.setItem('warehousesData', JSON.stringify(warehouses))
+}
 
-		if (searchQuery === '') {
-			alert('Введите название товара')
-			return
-		}
+// Инициализация склада
+function initializeWarehouse() {
+	loadFromLocalStorage()
+	updateWarehouseButtons()
+	updateProductDisplay()
+}
 
-		displayProducts(searchQuery)
-	}
+// Обработчик переключения склада
+function switchWarehouse(warehouseNumber) {
+	currentWarehouse = warehouseNumber
+	updateWarehouseButtons()
+	initializeWarehouse()
+}
 
-	findButton.addEventListener('click', searchProduct)
+// Обработчик события нажатия на кнопку склада
+const warehouseButtons = document.querySelectorAll('.warehouse-button')
+warehouseButtons.forEach(button => {
+	button.addEventListener('click', () => {
+		const warehouseNumber = parseInt(button.dataset.warehouse)
+		switchWarehouse(warehouseNumber)
+	})
+})
 
-	let selectedProduct = null
-
-	// Функция для выбора продукта
-	function selectProduct(productId) {
-		selectedProduct = products.find(product => product.id === productId)
-		document.getElementById('price').value = selectedProduct.price
-		productDropdown.value = selectedProduct.id // синхронизируем с выпадающим списком
-	}
-
-	// Обработчик для изменения в выпадающем списке
-	productDropdown.addEventListener('change', event => {
-		const productId = parseInt(event.target.value, 10)
-		if (!isNaN(productId)) {
-			selectProduct(productId)
+function updateWarehouseButtons() {
+	warehouseButtons.forEach(button => {
+		const warehouseNumber = parseInt(button.dataset.warehouse)
+		if (warehouseNumber === currentWarehouse) {
+			button.classList.add('active-warehouse')
 		} else {
-			selectedProduct = null
-			document.getElementById('price').value = 0
+			button.classList.remove('active-warehouse')
 		}
 	})
+}
 
-	// Загрузка сохраненных данных из localStorage
-	function loadWarehouseData() {
-		const savedData = localStorage.getItem('warehouseData')
-		if (savedData) {
-			const warehouseData = JSON.parse(savedData)
-			warehouseData.forEach(item => {
-				addProductToTable(item.name, item.quantity, item.unitPrice)
-			})
-		}
+function updateProductDisplay() {
+	warehouseTableBody.innerHTML = ''
+	historyTableBody.innerHTML = ''
 
-		const savedHistory = localStorage.getItem('historyData')
-		if (savedHistory) {
-			const historyData = JSON.parse(savedHistory)
-			historyData.forEach(item => {
-				addHistoryToTable(
-					item.name,
-					item.addedQuantity,
-					item.soldQuantity,
-					item.unitPrice,
-					new Date(item.date)
-				)
-			})
-		}
-	}
+	warehouses[currentWarehouse].products.forEach(product => {
+		const row = warehouseTableBody.insertRow()
+		row.insertCell(0).textContent = product.name
+		row.insertCell(1).textContent = product.quantity
+		row.insertCell(2).textContent = product.price
+		row.insertCell(3).textContent = product.quantity * product.price
+	})
 
-	// Сохранение данных в localStorage
-	function saveWarehouseData() {
-		const data = Array.from(warehouseTableBody.rows).map(row => ({
-			name: row.cells[0].textContent,
-			quantity: parseInt(row.cells[1].textContent, 10),
-			unitPrice: parseFloat(row.cells[2].textContent.replace(" so'm", '')),
-		}))
-		localStorage.setItem('warehouseData', JSON.stringify(data))
-	}
-
-	function saveHistoryData(name, addedQuantity, soldQuantity, unitPrice) {
-		const currentDate = new Date().toISOString()
-		let historyData = JSON.parse(localStorage.getItem('historyData')) || []
-		historyData.push({
-			name,
-			addedQuantity,
-			soldQuantity,
-			unitPrice,
-			date: currentDate,
-		})
-		localStorage.setItem('historyData', JSON.stringify(historyData))
-	}
-
-	// Функция для добавления продукта в таблицу склада
-	function addProductToTable(name, quantity, unitPrice) {
-		const existingRow = Array.from(warehouseTableBody.rows).find(
-			row => row.cells[0].textContent === name
-		)
-
-		if (existingRow) {
-			const currentQuantity = parseInt(existingRow.cells[1].textContent, 10)
-			const newQuantity = currentQuantity + quantity
-			existingRow.cells[1].textContent = newQuantity
-			existingRow.cells[3].textContent = `${(newQuantity * unitPrice).toFixed(
-				2
-			)} so'm`
-		} else {
-			const row = warehouseTableBody.insertRow()
-			row.insertCell().textContent = name
-			row.insertCell().textContent = quantity
-			row.insertCell().textContent = `${unitPrice.toFixed(2)} so'm`
-			row.insertCell().textContent = `${(quantity * unitPrice).toFixed(2)} so'm`
-		}
-
-		saveWarehouseData()
-	}
-
-	// Функция для добавления записи в историю изменений
-	function addHistoryToTable(
-		name,
-		addedQuantity,
-		soldQuantity,
-		unitPrice,
-		date
-	) {
+	warehouses[currentWarehouse].history.forEach(entry => {
 		const row = historyTableBody.insertRow()
-		row.insertCell().textContent = name
-		row.insertCell().textContent = addedQuantity
-		row.insertCell().textContent = soldQuantity
-		row.insertCell().textContent = `${unitPrice.toFixed(2)} so'm`
-		row.insertCell().textContent = date.toLocaleString()
-	}
+		row.insertCell(0).textContent = entry.name
+		row.insertCell(1).textContent = entry.added
+		row.insertCell(2).textContent = entry.sold
+		row.insertCell(3).textContent = entry.price
+		row.insertCell(4).textContent = new Date(entry.date).toLocaleString()
+	})
+}
 
-	// Функция для обновления продуктов на складе
-	window.updateProducts = function () {
-		if (!selectedProduct) {
-			alert('Выберите продукт')
-			return
-		}
+function updateProducts() {
+	const productName =
+		document.getElementById('product-dropdown').selectedOptions[0].textContent
+	const addedQuantity = parseInt(
+		document.getElementById('added-quantity').value
+	)
+	const soldQuantity = parseInt(document.getElementById('sold-quantity').value)
+	const price = parseInt(document.getElementById('price').value)
 
-		const addedQuantity = parseInt(
-			document.getElementById('added-quantity').value,
-			10
-		)
-		const soldQuantity = parseInt(
-			document.getElementById('sold-quantity').value,
-			10
-		)
-		const unitPrice = parseFloat(document.getElementById('price').value)
-
-		if (isNaN(addedQuantity) || isNaN(soldQuantity) || isNaN(unitPrice)) {
-			alert('Пожалуйста, введите правильные значения для всех полей')
-			return
-		}
-
-		const existingRow = Array.from(warehouseTableBody.rows).find(
-			row => row.cells[0].textContent === selectedProduct.name
+	if (productName && (addedQuantity > 0 || soldQuantity > 0)) {
+		const product = warehouses[currentWarehouse].products.find(
+			p => p.name === productName
 		)
 
-		if (existingRow) {
-			const currentQuantity = parseInt(existingRow.cells[1].textContent, 10)
-
-			// Calculate the new quantity and check for negatives
-			let newQuantity = currentQuantity + addedQuantity - soldQuantity
-			if (newQuantity < 0) {
-				alert('Количество на складе не может быть отрицательным')
-				return
-			}
-
-			existingRow.cells[1].textContent = newQuantity
-			existingRow.cells[3].textContent = `${(newQuantity * unitPrice).toFixed(
-				2
-			)} so'm`
+		if (product) {
+			product.quantity += addedQuantity
+			product.quantity -= soldQuantity
+			product.price = price
 		} else {
-			// If no existing row, ensure we are not trying to sell more than added
-			if (addedQuantity < soldQuantity) {
-				alert('Количество на складе не может быть отрицательным')
-				return
-			}
-
-			addProductToTable(
-				selectedProduct.name,
-				addedQuantity - soldQuantity,
-				unitPrice
-			)
+			warehouses[currentWarehouse].products.push({
+				name: productName,
+				quantity: addedQuantity - soldQuantity,
+				price: price,
+			})
 		}
 
-		addHistoryToTable(
-			selectedProduct.name,
-			addedQuantity,
-			soldQuantity,
-			unitPrice,
-			new Date()
-		)
-		saveHistoryData(
-			selectedProduct.name,
-			addedQuantity,
-			soldQuantity,
-			unitPrice
-		)
+		warehouses[currentWarehouse].history.push({
+			name: productName,
+			added: addedQuantity,
+			sold: soldQuantity,
+			price: price,
+			date: new Date(),
+		})
 
-		// Reset input fields
-		document.getElementById('added-quantity').value = 0
-		document.getElementById('sold-quantity').value = 0
-		saveWarehouseData()
+		saveToLocalStorage()
+		updateProductDisplay()
+	}
+}
+
+function findAndHighlightProduct() {
+	const searchTerm = searchBar.value.trim().toLowerCase()
+
+	if (!searchTerm) {
+		alert('Введите название продукта для поиска')
+		return
 	}
 
-	loadWarehouseData()
-})
+	const productRows = warehouseTableBody.getElementsByTagName('tr')
+	let found = false
+
+	for (const row of productRows) {
+		const productName = row.cells[0].textContent.toLowerCase()
+		if (productName.includes(searchTerm)) {
+			row.classList.add('highlight')
+			row.scrollIntoView({ behavior: 'smooth', block: 'center' })
+			found = true
+			setTimeout(() => {
+				row.classList.remove('highlight')
+			}, 2000)
+			break
+		}
+	}
+
+	if (!found) {
+		alert('Продукт не найден в текущем складе')
+	}
+}
+
+function undoLastChange() {
+	const history = warehouses[currentWarehouse].history
+	if (history.length === 0) {
+		alert('Нет изменений для отката')
+		return
+	}
+
+	const lastChange = history.pop()
+	const product = warehouses[currentWarehouse].products.find(
+		p => p.name === lastChange.name
+	)
+
+	if (product) {
+		product.quantity -= lastChange.added
+		product.quantity += lastChange.sold
+
+		// Если количество продукта стало 0 или меньше, удаляем его из списка
+		if (product.quantity <= 0) {
+			const productIndex =
+				warehouses[currentWarehouse].products.indexOf(product)
+			if (productIndex > -1) {
+				warehouses[currentWarehouse].products.splice(productIndex, 1)
+			}
+		}
+	}
+
+	saveToLocalStorage()
+	updateProductDisplay()
+}
+
+findButton.addEventListener('click', findAndHighlightProduct)
+document.getElementById('undo-button').addEventListener('click', undoLastChange)
+initializeWarehouse()
