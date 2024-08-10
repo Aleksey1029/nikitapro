@@ -66,32 +66,38 @@ function updateProductDisplay() {
 	warehouseTableBody.innerHTML = ''
 	historyTableBody.innerHTML = ''
 
-	warehouses[currentWarehouse].products.forEach(product => {
+	warehouses[currentWarehouse].products.forEach((product, index) => {
 		const row = warehouseTableBody.insertRow()
 		row.insertCell(0).textContent = product.name
-		row.insertCell(1).textContent = product.quantity
-		row.insertCell(2).textContent = product.price
-		row.insertCell(3).textContent = product.quantity * product.price
+		row.insertCell(1).textContent = product.quantity || 0
+		row.insertCell(2).textContent = product.price || 0
+		row.insertCell(3).textContent =
+			(product.quantity || 0) * (product.price || 0)
+
+		const deleteCell = row.insertCell(4)
+		const deleteButton = document.createElement('button')
+		deleteButton.textContent = 'Удалить'
+		deleteButton.addEventListener('click', () => deleteProduct(index))
+		deleteCell.appendChild(deleteButton)
 	})
 
 	warehouses[currentWarehouse].history.forEach(entry => {
 		const row = historyTableBody.insertRow()
 		row.insertCell(0).textContent = entry.name
-		row.insertCell(1).textContent = entry.added
-		row.insertCell(2).textContent = entry.sold
-		row.insertCell(3).textContent = entry.price
+		row.insertCell(1).textContent = entry.added || 0
+		row.insertCell(2).textContent = entry.sold || 0
+		row.insertCell(3).textContent = entry.price || 0
 		row.insertCell(4).textContent = new Date(entry.date).toLocaleString()
 	})
 }
 
 function updateProducts() {
-	const productName =
-		document.getElementById('product-dropdown').selectedOptions[0].textContent
-	const addedQuantity = parseInt(
-		document.getElementById('added-quantity').value
-	)
-	const soldQuantity = parseInt(document.getElementById('sold-quantity').value)
-	const price = parseInt(document.getElementById('price').value)
+	const productName = document.getElementById('product-name').value.trim()
+	const addedQuantity =
+		parseInt(document.getElementById('added-quantity').value) || 0
+	const soldQuantity =
+		parseInt(document.getElementById('sold-quantity').value) || 0
+	const price = parseInt(document.getElementById('price').value) || 0
 
 	if (productName && (addedQuantity > 0 || soldQuantity > 0)) {
 		const product = warehouses[currentWarehouse].products.find(
@@ -152,6 +158,14 @@ function findAndHighlightProduct() {
 	}
 }
 
+function deleteProduct(index) {
+	if (confirm('Вы уверены, что хотите удалить этот продукт?')) {
+		warehouses[currentWarehouse].products.splice(index, 1)
+		saveToLocalStorage()
+		updateProductDisplay()
+	}
+}
+
 function undoLastChange() {
 	const history = warehouses[currentWarehouse].history
 	if (history.length === 0) {
@@ -168,13 +182,10 @@ function undoLastChange() {
 		product.quantity -= lastChange.added
 		product.quantity += lastChange.sold
 
-		// Если количество продукта стало 0 или меньше, удаляем его из списка
 		if (product.quantity <= 0) {
 			const productIndex =
 				warehouses[currentWarehouse].products.indexOf(product)
-			if (productIndex > -1) {
-				warehouses[currentWarehouse].products.splice(productIndex, 1)
-			}
+			warehouses[currentWarehouse].products.splice(productIndex, 1)
 		}
 	}
 
@@ -182,6 +193,11 @@ function undoLastChange() {
 	updateProductDisplay()
 }
 
+// Добавляем обработчик для кнопки поиска
 findButton.addEventListener('click', findAndHighlightProduct)
+
+// Обработчик отката последнего изменения
 document.getElementById('undo-button').addEventListener('click', undoLastChange)
+
+// Инициализируем данные при загрузке страницы
 initializeWarehouse()

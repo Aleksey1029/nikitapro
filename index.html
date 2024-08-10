@@ -10,15 +10,9 @@
     <div id="sidebar">
         <h1>Управление складом</h1>
         <div id="warehouse-buttons">
-            <button type="button" class="warehouse-button" data-warehouse="1">
-                Склад 1
-            </button>
-            <button type="button" class="warehouse-button" data-warehouse="2">
-                Склад 2
-            </button>
-            <button type="button" class="warehouse-button" data-warehouse="3">
-                Склад 3
-            </button>
+            <button type="button" class="warehouse-button" data-warehouse="1">Склад 1</button>
+            <button type="button" class="warehouse-button" data-warehouse="2">Склад 2</button>
+            <button type="button" class="warehouse-button" data-warehouse="3">Склад 3</button>
         </div>
         <div id="product-search">
             <input type="text" id="search-bar" placeholder="Поиск продуктов..." />
@@ -26,33 +20,17 @@
         </div>
         <div id="product-actions">
             <h2>Обновить продукты</h2>
-            <select id="product-dropdown">
-                <option value="">Выберите продукт...</option>
-                <option value="1">Product A</option>
-                <option value="2">Product B</option>
-                <option value="3">Product C</option>
-                <option value="4">Product D</option>
-                <option value="5">Product E</option>
-                <option value="6">Product F</option>
-                <option value="7">Product G</option>
-                <option value="8">Product H</option>
-                <option value="9">Product I</option>
-                <option value="10">Product J</option>
-                <option value="11">Product K</option>
-                <option value="12">Product L</option>
-                <option value="13">Product M</option>
-                <option value="14">Product N</option>
-                <option value="15">Product O</option>
-            </select>
+            <label for="product-name">Название продукта:</label>
+            <input type="text" id="product-name" placeholder="Введите название продукта..." />
 
             <label for="added-quantity">Добавлено в магазин:</label>
-            <input type="number" id="added-quantity" min="0" value="0" />
+            <input type="number" id="added-quantity" min="0" value="" placeholder="0" />
 
             <label for="sold-quantity">Продано с магазина:</label>
-            <input type="number" id="sold-quantity" min="0" value="0" />
+            <input type="number" id="sold-quantity" min="0" value="" placeholder="0" />
 
             <label for="price">Цена товара (в сумах):</label>
-            <input type="number" id="price" min="0" value="0" />
+            <input type="number" id="price" min="0" value="" placeholder="0" />
 
             <button type="button" onclick="updateProducts()">Обновить</button>
         </div>
@@ -71,6 +49,7 @@
                         <th>В магазине</th>
                         <th>Цена за ед. (so'm)</th>
                         <th>Общ. цена (so'm)</th>
+                        <th>Удаление</th>
                     </tr>
                 </thead>
                 <tbody>
