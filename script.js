@@ -99,16 +99,28 @@ function updateProducts() {
 		parseInt(document.getElementById('sold-quantity').value) || 0
 	const price = parseInt(document.getElementById('price').value) || 0
 
-	if (productName && (addedQuantity > 0 || soldQuantity > 0)) {
+	if (productName) {
 		const product = warehouses[currentWarehouse].products.find(
 			p => p.name === productName
 		)
 
 		if (product) {
+			if (product.quantity === 0 && soldQuantity > 0) {
+				alert('Товаров нету на складе')
+				return
+			} else if (product.quantity < soldQuantity) {
+				alert('Такого количества для продажи нету на складе')
+				return
+			}
+
 			product.quantity += addedQuantity
 			product.quantity -= soldQuantity
 			product.price = price
 		} else {
+			if (soldQuantity > 0) {
+				alert('Товара нету на складе')
+				return
+			}
 			warehouses[currentWarehouse].products.push({
 				name: productName,
 				quantity: addedQuantity - soldQuantity,
@@ -126,8 +138,13 @@ function updateProducts() {
 
 		saveToLocalStorage()
 		updateProductDisplay()
+	} else {
+		alert('Введите название продукта')
 	}
 }
+
+
+
 
 function findAndHighlightProduct() {
 	const searchTerm = searchBar.value.trim().toLowerCase()
