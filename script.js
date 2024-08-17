@@ -5,6 +5,10 @@ let warehouses = {
 	3: { products: [], history: [] },
 }
 
+// Элементы управления валютой
+const exchangeRateInput = document.getElementById('exchange-rate')
+const currencySelect = document.getElementById('currency')
+
 const warehouseTableBody = document
 	.getElementById('warehouse-table')
 	.getElementsByTagName('tbody')[0]
@@ -14,8 +18,8 @@ const historyTableBody = document
 
 const findButton = document.getElementById('find-button')
 const searchBar = document.getElementById('search-bar')
+const productNameInput = document.getElementById('product-name')
 
-// Загрузка данных из localStorage
 function loadFromLocalStorage() {
 	const savedData = localStorage.getItem('warehousesData')
 	if (savedData) {
@@ -23,26 +27,22 @@ function loadFromLocalStorage() {
 	}
 }
 
-// Сохранение данных в localStorage
 function saveToLocalStorage() {
 	localStorage.setItem('warehousesData', JSON.stringify(warehouses))
 }
 
-// Инициализация склада
 function initializeWarehouse() {
 	loadFromLocalStorage()
 	updateWarehouseButtons()
 	updateProductDisplay()
 }
 
-// Обработчик переключения склада
 function switchWarehouse(warehouseNumber) {
 	currentWarehouse = warehouseNumber
 	updateWarehouseButtons()
 	initializeWarehouse()
 }
 
-// Обработчик события нажатия на кнопку склада
 const warehouseButtons = document.querySelectorAll('.warehouse-button')
 warehouseButtons.forEach(button => {
 	button.addEventListener('click', () => {
@@ -63,16 +63,27 @@ function updateWarehouseButtons() {
 }
 
 function updateProductDisplay() {
+	const exchangeRate = parseFloat(exchangeRateInput.value) || 1
+	const currency = currencySelect.value
+
 	warehouseTableBody.innerHTML = ''
 	historyTableBody.innerHTML = ''
 
 	warehouses[currentWarehouse].products.forEach((product, index) => {
 		const row = warehouseTableBody.insertRow()
 		row.insertCell(0).textContent = product.name
+
+		let price = product.price || 0
+		let total = (product.quantity || 0) * price
+
+		if (currency === 'uzs') {
+			price *= exchangeRate
+			total *= exchangeRate
+		}
+
 		row.insertCell(1).textContent = product.quantity || 0
-		row.insertCell(2).textContent = product.price || 0
-		row.insertCell(3).textContent =
-			(product.quantity || 0) * (product.price || 0)
+		row.insertCell(2).textContent = price.toFixed(2)
+		row.insertCell(3).textContent = total.toFixed(2)
 
 		const deleteCell = row.insertCell(4)
 		const deleteButton = document.createElement('button')
@@ -97,7 +108,14 @@ function updateProducts() {
 		parseInt(document.getElementById('added-quantity').value) || 0
 	const soldQuantity =
 		parseInt(document.getElementById('sold-quantity').value) || 0
-	const price = parseInt(document.getElementById('price').value) || 0
+	let price = parseInt(document.getElementById('price').value) || 0
+
+	const exchangeRate = parseFloat(exchangeRateInput.value) || 1
+	const currency = currencySelect.value
+
+	if (currency === 'uzs') {
+		price /= exchangeRate // Конвертируем в USD для хранения
+	}
 
 	if (productName) {
 		const product = warehouses[currentWarehouse].products.find(
@@ -121,9 +139,16 @@ function updateProducts() {
 				alert('Товара нету на складе')
 				return
 			}
+			if (addedQuantity === 0) {
+				alert(
+					'Вы должны добавить хотя бы один товар, чтобы зарегистрировать его на складе.'
+				)
+				return
+			}
+
 			warehouses[currentWarehouse].products.push({
 				name: productName,
-				quantity: addedQuantity - soldQuantity,
+				quantity: addedQuantity,
 				price: price,
 			})
 		}
@@ -142,9 +167,6 @@ function updateProducts() {
 		alert('Введите название продукта')
 	}
 }
-
-
-
 
 function findAndHighlightProduct() {
 	const searchTerm = searchBar.value.trim().toLowerCase()
@@ -190,31 +212,23 @@ function undoLastChange() {
 		return
 	}
 
-	const lastChange = history.pop()
+	const lastEntry = history.pop()
 	const product = warehouses[currentWarehouse].products.find(
-		p => p.name === lastChange.name
+		p => p.name === lastEntry.name
 	)
 
 	if (product) {
-		product.quantity -= lastChange.added
-		product.quantity += lastChange.sold
-
-		if (product.quantity <= 0) {
-			const productIndex =
-				warehouses[currentWarehouse].products.indexOf(product)
-			warehouses[currentWarehouse].products.splice(productIndex, 1)
-		}
+		product.quantity -= lastEntry.added || 0
+		product.quantity += lastEntry.sold || 0
+		product.price = lastEntry.price || 0
+	} else {
+		warehouses[currentWarehouse].products.push({
+			name: lastEntry.name,
+			quantity: lastEntry.added || 0,
+			price: lastEntry.price || 0,
+		})
 	}
 
 	saveToLocalStorage()
 	updateProductDisplay()
 }
-
-// Добавляем обработчик для кнопки поиска
-findButton.addEventListener('click', findAndHighlightProduct)
-
-// Обработчик отката последнего изменения
-document.getElementById('undo-button').addEventListener('click', undoLastChange)
-
-// Инициализируем данные при загрузке страницы
-initializeWarehouse()

@@ -1,82 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Управление складом</title>
-    <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-    <div id="sidebar">
-        <h1>Управление складом</h1>
-        <div id="warehouse-buttons">
-            <button type="button" class="warehouse-button" data-warehouse="1">Склад 1</button>
-            <button type="button" class="warehouse-button" data-warehouse="2">Склад 2</button>
-            <button type="button" class="warehouse-button" data-warehouse="3">Склад 3</button>
-        </div>
-        <div id="product-search">
-            <input type="text" id="search-bar" placeholder="Поиск продуктов..." />
-            <button type="button" id="find-button">Найти</button>
-        </div>
-        <div id="product-actions">
-            <h2>Обновить продукты</h2>
-            <label for="product-name">Название продукта:</label>
-            <input type="text" id="product-name" placeholder="Введите название продукта..." />
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Управление складом</title>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<div id="sidebar">
+			<h1>Управление складом</h1>
+			<div id="warehouse-buttons">
+				<button type="button" class="warehouse-button" data-warehouse="1">
+					Склад 1
+				</button>
+				<button type="button" class="warehouse-button" data-warehouse="2">
+					Склад 2
+				</button>
+				<button type="button" class="warehouse-button" data-warehouse="3">
+					Склад 3
+				</button>
+			</div>
+			<div id="product-search">
+				<input
+					type="text"
+					id="search-bar"
+					placeholder="Поиск продуктов..."
+					autocomplete="off"
+				/>
+				<button type="button" id="find-button">Найти</button>
+				<div id="suggestions" class="suggestions-list"></div>
+				<!-- Контейнер для подсказок -->
+			</div>
+			<div>
+				<label for="exchange-rate">Курс USD к UZS:</label>
+				<input type="number" id="exchange-rate" value="11500" />
+			</div>
+			<div>
+				<label for="currency">Выберите валюту:</label>
+				<select id="currency">
+					<option value="usd">USD</option>
+					<option value="uzs">UZS</option>
+				</select>
+			</div>
 
-            <label for="added-quantity">Добавлено в магазин:</label>
-            <input type="number" id="added-quantity" min="0" value="" placeholder="0" />
+			<div id="product-actions">
+				<h2>Обновить продукты</h2>
+				<label for="product-name">Название продукта:</label>
+				<input
+					type="text"
+					id="product-name"
+					placeholder="Введите название продукта..."
+				/>
 
-            <label for="sold-quantity">Продано с магазина:</label>
-            <input type="number" id="sold-quantity" min="0" value="" placeholder="0" />
+				<label for="added-quantity">Добавлено в магазин:</label>
+				<input
+					type="number"
+					id="added-quantity"
+					min="0"
+					value=""
+					placeholder="0"
+				/>
 
-            <label for="price">Цена товара (в сумах):</label>
-            <input type="number" id="price" min="0" value="" placeholder="0" />
+				<label for="sold-quantity">Продано с магазина:</label>
+				<input
+					type="number"
+					id="sold-quantity"
+					min="0"
+					value=""
+					placeholder="0"
+				/>
 
-            <button type="button" onclick="updateProducts()">Обновить</button>
-        </div>
-    </div>
+				<label for="price">Цена товара (в сумах):</label>
+				<input type="number" id="price" min="0" value="" placeholder="0" />
 
-    <div id="content">
-        <div class="content-header">
-            <h2>Товары в магазине</h2>
-            <button type="button" id="undo-button">Откат</button>
-        </div>
-        <div class="table-container">
-            <table id="warehouse-table" class="table">
-                <thead>
-                    <tr>
-                        <th>Название</th>
-                        <th>В магазине</th>
-                        <th>Цена за ед. (so'm)</th>
-                        <th>Общ. цена (so'm)</th>
-                        <th>Удаление</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Добавленные товары будут здесь -->
-                </tbody>
-            </table>
-        </div>
+				<button type="button" onclick="updateProducts()">Обновить</button>
+			</div>
+		</div>
 
-        <h2>История изменений</h2>
-        <div class="table-container">
-            <table id="history-table" class="table">
-                <thead>
-                    <tr>
-                        <th>Название</th>
-                        <th>Добавлено</th>
-                        <th>Продано</th>
-                        <th>Цена за ед. (so'm)</th>
-                        <th>Дата</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- История изменений будет здесь -->
-                </tbody>
-            </table>
-        </div>
-    </div>
+		<div id="content">
+			<div class="content-header">
+				<h2>Товары в магазине</h2>
+				<button type="button" id="undo-button">Откат</button>
+			</div>
+			<div class="table-container">
+				<table id="warehouse-table" class="table">
+					<thead>
+						<tr>
+							<th>Название</th>
+							<th>В магазине</th>
+							<th>Цена за ед. (so'm)</th>
+							<th>Общ. цена (so'm)</th>
+							<th>Удаление</th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- Добавленные товары будут здесь -->
+					</tbody>
+				</table>
+			</div>
 
-    <script src="script.js"></script>
-</body>
+			<h2>История изменений</h2>
+			<div class="table-container">
+				<table id="history-table" class="table">
+					<thead>
+						<tr>
+							<th>Название</th>
+							<th>Добавлено</th>
+							<th>Продано</th>
+							<th>Цена за ед. (so'm)</th>
+							<th>Дата</th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- История изменений будет здесь -->
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<script src="script.js"></script>
+	</body>
 </html>
