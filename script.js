@@ -5,9 +5,9 @@ let warehouses = {
 	3: { products: [], history: [] },
 }
 
-// Элементы управления валютой
-const exchangeRateInput = document.getElementById('exchange-rate')
-const currencySelect = document.getElementById('currency')
+// Элементы управления валютой (если нужно)
+// const exchangeRateInput = document.getElementById('exchange-rate');
+// const currencySelect = document.getElementById('currency');
 
 const warehouseTableBody = document
 	.getElementById('warehouse-table')
@@ -19,6 +19,7 @@ const historyTableBody = document
 const findButton = document.getElementById('find-button')
 const searchBar = document.getElementById('search-bar')
 const productNameInput = document.getElementById('product-name')
+const undoButton = document.getElementById('undo-button')
 
 function loadFromLocalStorage() {
 	const savedData = localStorage.getItem('warehousesData')
@@ -63,9 +64,6 @@ function updateWarehouseButtons() {
 }
 
 function updateProductDisplay() {
-	const exchangeRate = parseFloat(exchangeRateInput.value) || 1
-	const currency = currencySelect.value
-
 	warehouseTableBody.innerHTML = ''
 	historyTableBody.innerHTML = ''
 
@@ -75,11 +73,6 @@ function updateProductDisplay() {
 
 		let price = product.price || 0
 		let total = (product.quantity || 0) * price
-
-		if (currency === 'uzs') {
-			price *= exchangeRate
-			total *= exchangeRate
-		}
 
 		row.insertCell(1).textContent = product.quantity || 0
 		row.insertCell(2).textContent = price.toFixed(2)
@@ -109,13 +102,6 @@ function updateProducts() {
 	const soldQuantity =
 		parseInt(document.getElementById('sold-quantity').value) || 0
 	let price = parseInt(document.getElementById('price').value) || 0
-
-	const exchangeRate = parseFloat(exchangeRateInput.value) || 1
-	const currency = currencySelect.value
-
-	if (currency === 'uzs') {
-		price /= exchangeRate // Конвертируем в USD для хранения
-	}
 
 	if (productName) {
 		const product = warehouses[currentWarehouse].products.find(
@@ -221,7 +207,16 @@ function undoLastChange() {
 		product.quantity -= lastEntry.added || 0
 		product.quantity += lastEntry.sold || 0
 		product.price = lastEntry.price || 0
+
+		// Удаляем продукт, если его количество стало нулевым или отрицательным
+		if (product.quantity <= 0) {
+			const index = warehouses[currentWarehouse].products.indexOf(product)
+			if (index > -1) {
+				warehouses[currentWarehouse].products.splice(index, 1)
+			}
+		}
 	} else {
+		// В случае, если продукт был удалён, нужно удалить его из истории и не добавлять обратно
 		warehouses[currentWarehouse].products.push({
 			name: lastEntry.name,
 			quantity: lastEntry.added || 0,
@@ -232,3 +227,10 @@ function undoLastChange() {
 	saveToLocalStorage()
 	updateProductDisplay()
 }
+
+
+// Добавляем обработчик события для кнопки "Откат"
+undoButton.addEventListener('click', undoLastChange)
+
+// Инициализация при загрузке страницы
+initializeWarehouse()
