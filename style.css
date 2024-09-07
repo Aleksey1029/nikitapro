@@ -80,27 +80,32 @@ h2 {
 	width: calc(100% - 100px);
 }
 
-#suggestions {
+#product-input-pro {
+	position: relative;
+}
+
+
+.suggestions {
+	/* border: 1px solid #ccc; */
+	border-top: none;
 	position: absolute;
-	top: 38px; /* Высота input + отступ */
-	left: 0;
-	right: 0;
-	background-color: #fff;
-	border: 1px solid #ddd;
-	border-radius: 4px;
+	top: 100%; /* Позиционируем под полем ввода */
+	left: 3%;
+	background-color: white;
 	z-index: 1000;
+	width: 94%; /* Или установите конкретную ширину */
 	max-height: 150px;
 	overflow-y: auto;
-	display: none; /* По умолчанию скрыто */
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Добавляем тень для лучшей видимости */
 }
 
 .suggestion-item {
-	padding: 8px 10px;
+	padding: 8px;
 	cursor: pointer;
 }
 
 .suggestion-item:hover {
-	background-color: #f0f0f0;
+	background-color: #ddd;
 }
 
 /* Основной контент */
@@ -169,7 +174,7 @@ button:hover {
 
 /* Контейнер для таблицы на складе и истории изменений */
 .table-container {
-	max-height: 290px;
+	max-height: 300px;
 	overflow-y: auto;
 	margin-top: 20px;
 	border: 1px solid #ddd;

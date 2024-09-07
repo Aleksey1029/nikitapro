@@ -5,10 +5,6 @@ let warehouses = {
 	3: { products: [], history: [] },
 }
 
-// Элементы управления валютой (если нужно)
-// const exchangeRateInput = document.getElementById('exchange-rate');
-// const currencySelect = document.getElementById('currency');
-
 const warehouseTableBody = document
 	.getElementById('warehouse-table')
 	.getElementsByTagName('tbody')[0]
@@ -20,6 +16,45 @@ const findButton = document.getElementById('find-button')
 const searchBar = document.getElementById('search-bar')
 const productNameInput = document.getElementById('product-name')
 const undoButton = document.getElementById('undo-button')
+const suggestionsContainer = document.getElementById('suggestions')
+
+
+
+
+function updateSuggestions() {
+	const searchTerm = productNameInput.value.trim().toLowerCase()
+
+	suggestionsContainer.innerHTML = ''
+
+	if (!searchTerm) {
+		return
+	}
+
+	const suggestions = warehouses[currentWarehouse].products
+		.filter(product => product.name.toLowerCase().includes(searchTerm))
+		.map(product => product.name)
+
+	suggestions.forEach(suggestion => {
+		const div = document.createElement('div')
+		div.textContent = suggestion
+		div.classList.add('suggestion-item')
+		div.addEventListener('click', () => {
+			productNameInput.value = suggestion
+			suggestionsContainer.innerHTML = ''
+		})
+		suggestionsContainer.appendChild(div)
+	})
+}
+
+productNameInput.addEventListener('input', updateSuggestions)
+
+
+
+
+
+
+
+
 
 function loadFromLocalStorage() {
 	const savedData = localStorage.getItem('warehousesData')
@@ -76,9 +111,25 @@ function updateProductDisplay() {
 
 		row.insertCell(1).textContent = product.quantity || 0
 		row.insertCell(2).textContent = price.toFixed(2)
-		row.insertCell(3).textContent = total.toFixed(2)
 
-		const deleteCell = row.insertCell(4)
+		const sellingPriceInput = document.createElement('input')
+		sellingPriceInput.type = 'text'
+		sellingPriceInput.value = product.sellingPrice?.toFixed(2) || '0.00'
+		sellingPriceInput.addEventListener('input', event => {
+			let value = event.target.value
+			value = value.replace(/[^0-9.]/g, '') // Разрешаем только цифры и точку
+			event.target.value = value
+
+			product.sellingPrice = parseFloat(value) || 0
+			saveToLocalStorage()
+		})
+
+		const sellingPriceCell = row.insertCell(3)
+		sellingPriceCell.appendChild(sellingPriceInput)
+
+		row.insertCell(4).textContent = total.toFixed(2)
+
+		const deleteCell = row.insertCell(5)
 		const deleteButton = document.createElement('button')
 		deleteButton.textContent = 'Удалить'
 		deleteButton.addEventListener('click', () => deleteProduct(index))
@@ -101,7 +152,12 @@ function updateProducts() {
 		parseInt(document.getElementById('added-quantity').value) || 0
 	const soldQuantity =
 		parseInt(document.getElementById('sold-quantity').value) || 0
-	let price = parseInt(document.getElementById('price').value) || 0
+	let price = parseInt(document.getElementById('price').value)
+
+	if (isNaN(price) || price <= 0) {
+		alert('Пожалуйста, укажите корректную цену товара в сумах.')
+		return
+	}
 
 	if (productName) {
 		const product = warehouses[currentWarehouse].products.find(
@@ -137,6 +193,12 @@ function updateProducts() {
 				quantity: addedQuantity,
 				price: price,
 			})
+
+			let sellingPrice =
+				parseInt(prompt('Укажите цену продажи для данного товара', '0')) || 0
+			warehouses[currentWarehouse].products[
+				warehouses[currentWarehouse].products.length - 1
+			].sellingPrice = sellingPrice
 		}
 
 		warehouses[currentWarehouse].history.push({
@@ -174,7 +236,8 @@ function findAndHighlightProduct() {
 			setTimeout(() => {
 				row.classList.remove('highlight')
 			}, 2000)
-			break
+		} else {
+			row.classList.remove('highlight')
 		}
 	}
 
@@ -194,7 +257,7 @@ function deleteProduct(index) {
 function undoLastChange() {
 	const history = warehouses[currentWarehouse].history
 	if (history.length === 0) {
-		alert('Нет изменений для отката')
+		alert('Нет действий для отката')
 		return
 	}
 
@@ -208,7 +271,6 @@ function undoLastChange() {
 		product.quantity += lastEntry.sold || 0
 		product.price = lastEntry.price || 0
 
-		// Удаляем продукт, если его количество стало нулевым или отрицательным
 		if (product.quantity <= 0) {
 			const index = warehouses[currentWarehouse].products.indexOf(product)
 			if (index > -1) {
@@ -216,7 +278,6 @@ function undoLastChange() {
 			}
 		}
 	} else {
-		// В случае, если продукт был удалён, нужно удалить его из истории и не добавлять обратно
 		warehouses[currentWarehouse].products.push({
 			name: lastEntry.name,
 			quantity: lastEntry.added || 0,
@@ -228,9 +289,21 @@ function undoLastChange() {
 	updateProductDisplay()
 }
 
+undoButton.addEventListener('click', () => {
+	if (warehouses[currentWarehouse].history.length === 0) {
+		alert('Нет действий для отката')
+		return
+	}
 
-// Добавляем обработчик события для кнопки "Откат"
-undoButton.addEventListener('click', undoLastChange)
+	const confirmUndo = confirm(
+		'Вы точно уверены, что хотите откатить последнее ваше действие?'
+	)
+	if (confirmUndo) {
+		undoLastChange()
+	} else {
+		console.log('Откат отменен пользователем')
+	}
+})
 
-// Инициализация при загрузке страницы
+
 initializeWarehouse()

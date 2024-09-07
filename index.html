@@ -27,19 +27,28 @@
 					placeholder="Поиск продуктов..."
 					autocomplete="off"
 				/>
-				<button type="button" id="find-button">Найти</button>
-				<div id="suggestions" class="suggestions-list"></div>
+				<button
+					type="button"
+					id="find-button"
+					onclick="findAndHighlightProduct()"
+				>
+					Найти
+				</button>
+
 				<!-- Контейнер для подсказок -->
 			</div>
 
 			<div id="product-actions">
 				<h2>Обновить продукты</h2>
 				<label for="product-name">Название продукта:</label>
-				<input
-					type="text"
-					id="product-name"
-					placeholder="Введите название продукта..."
-				/>
+				<div id="product-input-pro">
+					<input
+						type="text"
+						id="product-name"
+						placeholder="Введите название продукта..."
+					/>
+					<div id="suggestions" class="suggestions"></div>
+				</div>
 
 				<label for="added-quantity">Добавлено в магазин:</label>
 				<input
@@ -60,7 +69,14 @@
 				/>
 
 				<label for="price">Цена товара (в сумах):</label>
-				<input type="number" id="price" min="0" value="" placeholder="0" />
+				<input
+					type="number"
+					id="price"
+					min="0"
+					value=""
+					placeholder="0"
+					required
+				/>
 
 				<button type="button" onclick="updateProducts()">Обновить</button>
 			</div>
@@ -78,6 +94,7 @@
 							<th>Название</th>
 							<th>В магазине</th>
 							<th>Цена за ед. (so'm)</th>
+							<th>Цена продажи</th>
 							<th>Общ. цена (so'm)</th>
 							<th>Удаление</th>
 						</tr>
