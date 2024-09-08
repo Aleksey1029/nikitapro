@@ -165,6 +165,7 @@ function updateProducts() {
 		)
 
 		if (product) {
+			// Проверка на наличие товара и корректное количество для продажи
 			if (product.quantity === 0 && soldQuantity > 0) {
 				alert('Товаров нету на складе')
 				return
@@ -173,10 +174,11 @@ function updateProducts() {
 				return
 			}
 
+			// Только изменяем количество товара
 			product.quantity += addedQuantity
 			product.quantity -= soldQuantity
-			product.price = price
 		} else {
+			// Добавляем новый товар с ценой
 			if (soldQuantity > 0) {
 				alert('Товара нету на складе')
 				return
@@ -191,9 +193,10 @@ function updateProducts() {
 			warehouses[currentWarehouse].products.push({
 				name: productName,
 				quantity: addedQuantity,
-				price: price,
+				price: price, // Сохраняем цену за единицу
 			})
 
+			// Устанавливаем цену продажи
 			let sellingPrice =
 				parseInt(prompt('Укажите цену продажи для данного товара', '0')) || 0
 			warehouses[currentWarehouse].products[
@@ -201,6 +204,7 @@ function updateProducts() {
 			].sellingPrice = sellingPrice
 		}
 
+		// Добавляем запись в историю
 		warehouses[currentWarehouse].history.push({
 			name: productName,
 			added: addedQuantity,
@@ -215,6 +219,8 @@ function updateProducts() {
 		alert('Введите название продукта')
 	}
 }
+
+
 
 function findAndHighlightProduct() {
 	const searchTerm = searchBar.value.trim().toLowerCase()
