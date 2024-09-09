@@ -18,9 +18,6 @@ const productNameInput = document.getElementById('product-name')
 const undoButton = document.getElementById('undo-button')
 const suggestionsContainer = document.getElementById('suggestions')
 
-
-
-
 function updateSuggestions() {
 	const searchTerm = productNameInput.value.trim().toLowerCase()
 
@@ -47,14 +44,6 @@ function updateSuggestions() {
 }
 
 productNameInput.addEventListener('input', updateSuggestions)
-
-
-
-
-
-
-
-
 
 function loadFromLocalStorage() {
 	const savedData = localStorage.getItem('warehousesData')
@@ -220,8 +209,6 @@ function updateProducts() {
 	}
 }
 
-
-
 function findAndHighlightProduct() {
 	const searchTerm = searchBar.value.trim().toLowerCase()
 
@@ -310,6 +297,5 @@ undoButton.addEventListener('click', () => {
 		console.log('Откат отменен пользователем')
 	}
 })
-
 
 initializeWarehouse()
