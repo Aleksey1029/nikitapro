@@ -7,10 +7,20 @@
 }
 
 body {
-	background-color: #f4f4f9;
+	background: linear-gradient(135deg, #3498db, #acb6e5);
 	display: flex;
 	flex-wrap: wrap;
 	min-height: 100vh;
+}
+
+.login-body {
+	font-family: 'Arial', sans-serif;
+	background: linear-gradient(135deg, #3498db, #acb6e5);
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: #333;
 }
 
 h1,
@@ -51,7 +61,7 @@ h2 {
 	background-color: #3498db;
 	color: #fff;
 	padding: 10px 20px;
-	border: none;
+	border: 2px solid black;
 	border-radius: 4px;
 	cursor: pointer;
 	font-size: 1rem;
@@ -60,12 +70,12 @@ h2 {
 }
 
 .warehouse-button:hover {
-	background-color: #2980b9;
+	background-color: #246e9f;
 	border: 2px solid black;
 }
 
 .warehouse-button.active-warehouse {
-	background-color: #2980b9;
+	background-color: #246e9f;
 	border: 2px solid black;
 }
 
@@ -76,9 +86,9 @@ h2 {
 	margin-bottom: 20px;
 }
 
-#search-bar {
+/* #search-bar {
 	width: calc(100% - 100px);
-}
+} */
 
 #product-input-pro {
 	position: relative;
@@ -246,6 +256,78 @@ button:hover {
 	justify-content: space-between;
 }
 
+.con-text {
+	display: flex;
+}
+
+.login-container {
+	background-color: white;
+	padding: 40px;
+	border-radius: 10px;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+	width: 100%;
+	max-width: 400px;
+	text-align: center;
+}
+
+/* Стили заголовка */
+.login-container h1 {
+	margin-bottom: 20px;
+	font-size: 24px;
+	color: #333;
+}
+
+/* Стили для формы */
+.login-form {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+/* Стили для меток и полей ввода */
+.login-form label {
+	font-size: 16px;
+	color: #333;
+	text-align: left;
+}
+
+.login-form input {
+	padding: 12px;
+	font-size: 16px;
+	border: 2px solid #ddd;
+	border-radius: 8px;
+	outline: none;
+	transition: border-color 0.3s ease;
+}
+
+/* Фокус на инпуте */
+.login-form input:focus {
+	border-color: #3498db;
+}
+
+/* Стили для кнопки */
+.login-form button {
+	background-color: #3498db;
+	color: white;
+	border: none;
+	border-radius: 8px;
+	padding: 12px;
+	font-size: 18px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+.login-form button:hover {
+	background-color: #4eaded;
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+	.login-container {
+		padding: 20px;
+	}
+}
+
 /* Адаптивные стили */
 @media (max-width: 992px) {
 	#sidebar {
@@ -257,7 +339,13 @@ button:hover {
 	#content {
 		flex-basis: 100%;
 		max-width: 100%;
-		margin: 20px 0;
+		margin: 10px;
+	}
+}
+
+@media (max-width: 730px) {
+	#content {
+		max-width: 97%;
 	}
 }
 
@@ -268,7 +356,7 @@ button:hover {
 
 	h2 {
 		padding-top: 5px;
-		font-size: 1.2rem;
+		font-size: 1rem;
 	}
 
 	#product-actions label,
@@ -281,6 +369,11 @@ button:hover {
 	button {
 		font-size: 0.8rem;
 		padding: 8px 16px;
+	}
+
+	#undo-button {
+		padding: 8px 16px;
+		font-size: 0.8rem;
 	}
 
 	input[type='text'],
@@ -298,5 +391,32 @@ button:hover {
 	.suggestions {
 		left: 0;
 		width: 100%;
+	}
+
+	.warehouse-button {
+		padding: 7px 11px;
+		font-size: 1rem;
+	}
+}
+
+@media (max-width: 490px) {
+	#content {
+		max-width: 95%;
+		margin: 10px;
+	}
+}
+
+@media (max-width: 360px) {
+	.con-btn {
+		display: flex;
+    flex-direction: row;
+    align-items: center;
+		gap: 5px;
+	}
+}
+
+@media (max-width: 320px) {
+	#content {
+		max-width: 93%;
 	}
 }

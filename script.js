@@ -298,4 +298,88 @@ undoButton.addEventListener('click', () => {
 	}
 })
 
+/*login*/
+
+// Проверка авторизации при загрузке index.html
+window.addEventListener('DOMContentLoaded', () => {
+	const currentPath = window.location.pathname
+	const loggedInUser = localStorage.getItem('loggedInUser')
+
+	// Если пользователь не авторизован и находится на index.html, перенаправляем на login.html
+	if (!loggedInUser && currentPath.includes('127.0.0.1:5500')) {
+		window.location.href = 'login.html'
+	}
+
+	// Если пользователь авторизован и находится на login.html, перенаправляем на index.html
+	if (loggedInUser && currentPath.includes('login.html')) {
+		window.location.href = 'index.html'
+	}
+})
+
+// Функция для сохранения нового пользователя в localStorage
+function saveUser(username, password) {
+	const users = JSON.parse(localStorage.getItem('users')) || []
+	const userExists = users.some(user => user.username === username)
+
+	if (userExists) {
+		alert('Пользователь с таким именем уже существует')
+	} else {
+		users.push({ username, password })
+		localStorage.setItem('users', JSON.stringify(users))
+		alert('Регистрация успешна! Теперь вы можете войти.')
+	}
+}
+
+// Функция для проверки логина
+function authenticateUser(username, password) {
+	const users = JSON.parse(localStorage.getItem('users')) || []
+	return users.find(
+		user => user.username === username && user.password === password
+	)
+}
+
+// Обработка формы входа
+const loginForm = document.getElementById('login-form')
+if (loginForm) {
+	loginForm.addEventListener('submit', event => {
+		event.preventDefault()
+		const username = document.getElementById('username').value
+		const password = document.getElementById('password').value
+
+		if (authenticateUser(username, password)) {
+			localStorage.setItem('loggedInUser', username) // Сохраняем текущего пользователя
+			window.location.href = 'index.html' // Перенаправляем на главную страницу
+		} else {
+			alert('Неверное имя пользователя или пароль')
+		}
+	})
+}
+
+// Обработка формы регистрации
+const registerForm = document.getElementById('register-form')
+if (registerForm) {
+	registerForm.addEventListener('submit', event => {
+		event.preventDefault()
+		const username = document.getElementById('reg-username').value
+		const password = document.getElementById('reg-password').value
+
+		if (username && password) {
+			saveUser(username, password)
+		} else {
+			alert('Пожалуйста, заполните все поля')
+		}
+	})
+}
+
+// Логика выхода из системы на index.html
+const logoutButton = document.getElementById('logout-button')
+if (logoutButton) {
+	logoutButton.addEventListener('click', () => {
+		localStorage.removeItem('loggedInUser') // Удаляем данные о текущем пользователе
+		window.location.href = 'login.html' // Перенаправляем на страницу логина
+	})
+}
+
+/*login end*/
+
 initializeWarehouse()
