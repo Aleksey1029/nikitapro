@@ -24,7 +24,7 @@
 				<input
 					type="text"
 					id="search-bar"
-					placeholder="Поиск продуктов..."
+					placeholder="Введите название или артикул товара"
 					autocomplete="off"
 				/>
 				<button
@@ -34,22 +34,33 @@
 				>
 					Найти
 				</button>
-
-				<!-- Контейнер для подсказок -->
 			</div>
 
 			<div id="product-actions">
-				<h2>Обновить продукты</h2>
+				<h2>Добавить продукты</h2>
+
+				<!-- Название продукта -->
 				<label for="product-name">Название продукта:</label>
 				<div id="product-input-pro">
 					<input
 						type="text"
 						id="product-name"
 						placeholder="Введите название продукта..."
+						required
 					/>
 					<div id="suggestions" class="suggestions"></div>
 				</div>
 
+				<!-- Артикул продукта -->
+				<label for="product-code">Артикул товара:</label>
+				<input
+					type="text"
+					id="product-code"
+					placeholder="Введите артикул товара..."
+					required
+				/>
+
+				<!-- Количество добавлено в магазин -->
 				<label for="added-quantity">Добавлено в магазин:</label>
 				<input
 					type="number"
@@ -59,6 +70,7 @@
 					placeholder="0"
 				/>
 
+				<!-- Количество продано -->
 				<label for="sold-quantity">Продано с магазина:</label>
 				<input
 					type="number"
@@ -68,6 +80,7 @@
 					placeholder="0"
 				/>
 
+				<!-- Цена товара -->
 				<label for="price">Цена товара (в сумах):</label>
 				<input
 					type="number"
@@ -97,6 +110,8 @@
 					<thead>
 						<tr>
 							<th>Название</th>
+							<th>Артикул</th>
+							<!-- Добавили новый столбец -->
 							<th>В магазине</th>
 							<th>Цена за ед. (so'm)</th>
 							<th>Цена продажи</th>
@@ -110,7 +125,7 @@
 				</table>
 			</div>
 
-			<h2>История изменений</h2>
+			<h3>История изменений</h3>
 			<div class="table-container">
 				<table id="history-table" class="table">
 					<thead>

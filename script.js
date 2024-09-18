@@ -94,12 +94,13 @@ function updateProductDisplay() {
 	warehouses[currentWarehouse].products.forEach((product, index) => {
 		const row = warehouseTableBody.insertRow()
 		row.insertCell(0).textContent = product.name
+		row.insertCell(1).textContent = product.code || '' // Отображение артикула
 
 		let price = product.price || 0
 		let total = (product.quantity || 0) * price
 
-		row.insertCell(1).textContent = product.quantity || 0
-		row.insertCell(2).textContent = price.toFixed(2)
+		row.insertCell(2).textContent = product.quantity || 0
+		row.insertCell(3).textContent = price.toFixed(2)
 
 		const sellingPriceInput = document.createElement('input')
 		sellingPriceInput.type = 'text'
@@ -113,12 +114,12 @@ function updateProductDisplay() {
 			saveToLocalStorage()
 		})
 
-		const sellingPriceCell = row.insertCell(3)
+		const sellingPriceCell = row.insertCell(4)
 		sellingPriceCell.appendChild(sellingPriceInput)
 
-		row.insertCell(4).textContent = total.toFixed(2)
+		row.insertCell(5).textContent = total.toFixed(2)
 
-		const deleteCell = row.insertCell(5)
+		const deleteCell = row.insertCell(6)
 		const deleteButton = document.createElement('button')
 		deleteButton.textContent = 'Удалить'
 		deleteButton.addEventListener('click', () => deleteProduct(index))
@@ -137,6 +138,7 @@ function updateProductDisplay() {
 
 function updateProducts() {
 	const productName = document.getElementById('product-name').value.trim()
+	const productCode = document.getElementById('product-code').value.trim() // Получаем артикул
 	const addedQuantity =
 		parseInt(document.getElementById('added-quantity').value) || 0
 	const soldQuantity =
@@ -145,6 +147,11 @@ function updateProducts() {
 
 	if (isNaN(price) || price <= 0) {
 		alert('Пожалуйста, укажите корректную цену товара в сумах.')
+		return
+	}
+
+	if (!productCode) {
+		alert('Пожалуйста, укажите артикул товара.')
 		return
 	}
 
@@ -167,7 +174,7 @@ function updateProducts() {
 			product.quantity += addedQuantity
 			product.quantity -= soldQuantity
 		} else {
-			// Добавляем новый товар с ценой
+			// Добавляем новый товар с ценой и артикулом
 			if (soldQuantity > 0) {
 				alert('Товара нету на складе')
 				return
@@ -181,6 +188,7 @@ function updateProducts() {
 
 			warehouses[currentWarehouse].products.push({
 				name: productName,
+				code: productCode, // Сохраняем артикул
 				quantity: addedQuantity,
 				price: price, // Сохраняем цену за единицу
 			})
@@ -213,7 +221,7 @@ function findAndHighlightProduct() {
 	const searchTerm = searchBar.value.trim().toLowerCase()
 
 	if (!searchTerm) {
-		alert('Введите название продукта для поиска')
+		alert('Введите название продукта или артикул для поиска')
 		return
 	}
 
@@ -222,7 +230,9 @@ function findAndHighlightProduct() {
 
 	for (const row of productRows) {
 		const productName = row.cells[0].textContent.toLowerCase()
-		if (productName.includes(searchTerm)) {
+		const productCode = row.cells[1].textContent.toLowerCase() // Артикул в колонке 1 (второй столбец)
+
+		if (productName.includes(searchTerm) || productCode.includes(searchTerm)) {
 			row.classList.add('highlight')
 			row.scrollIntoView({ behavior: 'smooth', block: 'center' })
 			found = true
@@ -238,6 +248,7 @@ function findAndHighlightProduct() {
 		alert('Продукт не найден в текущем складе')
 	}
 }
+
 
 function deleteProduct(index) {
 	if (confirm('Вы уверены, что хотите удалить этот продукт?')) {
